@@ -8,10 +8,10 @@ How to use:
 - Stand-alone: use CLASH_Wrapper.gms as the main file
 
 # To get more information
-Please refer to the paper describing the model: 
+Please refer to the paper describing the model: https://gmd.copernicus.org/preprints/gmd-2023-146/
 
 # How to cite
-When using the model or parts of it, please cite the paper describing the model: 
+When using the model or parts of it, please cite the paper describing the model: https://gmd.copernicus.org/preprints/gmd-2023-146/
 
 # Licence
 CLASH is published with MIT License.
