@@ -2,7 +2,7 @@ $ontext
 
 CLASH - Climate-responsive Land Allocation model with carbon Storage and Harvests
 
-Version date: 2023-07-03
+Version date: 2024-01-22
 Contributors: Tommi Ekholm, Aapo Rautiainen, Nadine Freistetter  -  Finnish Meteorological Institute
 
 This file is the core of the CLASH model.
@@ -25,10 +25,10 @@ $ife not set CLASH_Param $setglobal CLASH_Param 'ECE'
 *********************************************************************************************************************************
 
 SETS
-        pool    land pools                                  / Boreal, Desert, DesertCold, Semiarid, TemperateDry, TemperateHumid, TropicalDry, TropicalHumid, Tundra, Unproductive /
-        use     land uses                                   / crops, pastr, primf, primn, secdf, secdn, urban /
-        cstock  carbon stocks                               / veg, litter, soil /
-        age     age classes (at 10 year time step)          / age010,age020,age030,age040,age050,age060,age070,age080,age090,age100,age110,age120,age130,age140,age150/
+        pool    Land pools                                  / Boreal, Desert, DesertCold, Semiarid, TemperateDry, TemperateHumid, TropicalDry, TropicalHumid, Tundra, Unproductive /
+        use     Land uses                                   / crops, pastr, primf, primn, secdf, secdn, urban /
+        cstock  Carbon stocks                               / veg, litter, soil /
+        age     Forest age classes (at 10 year time step)   / age010,age020,age030,age040,age050,age060,age070,age080,age090,age100,age110,age120,age130,age140,age150/
 ;
 
 
@@ -39,17 +39,18 @@ SETS
 
 PARAMETERS
 * Land area
-        Area(pool)                              Area of each land pool (mln. km2)
-        LU_initarea(pool,use)                   initial area by land use and land pool (million km2)
-        LU_initages(pool,age)                   initial areas of secondary forest age classes (million km2)
-        tstep                                   timestep (years)                                                        /10/
+        LU_TotalArea(pool)                      Area of each land pool (mln. km2)
+        LU_InitArea(pool,use)                   Initial area by land use and land pool (million km2)
+        LU_InitAges(pool,age)                   Initial areas of secondary forest age classes (million km2)
+        tstep                                   Model timestep (years)                                                  /10/
 * Crop yield and Pasture NPPs
         LU_Crop_Yields(t,pool)                  Crop yield by land pool (kg dry mass per m2 per year)
         LU_Crop_LossShare                       Share of crops lost and used as seeds                                   / 0.07 /
+        LU_Cropping_Intensity                   Cropland used intensity (excl. fallow etc.)                             / 0.8  /
         LU_Pasture_NPP(t,pool)                  NPP in pastures (kg C per m2 per year)
 * Carbon density
-        LU_Cdens(t,pool,use)                    carbon density for land other than secondary forests (kg C per m2)
-        LU_Cdens_SecnFor(t,pool,age)            carbon density of secondary forests by age-class (kg C per m2)
+        LU_Cdens(t,pool,use)                    Carbon density for land other than secondary forests (kg C per m2)
+        LU_Cdens_SecnFor(t,pool,age)            Carbon density of secondary forests by age-class (kg C per m2)
         LU_DistProbSecnF(t,pool)                natural disturbance probability in secondary forests
         LU_InitCdensityCropland(pool, cstock)   Initial litter and soil carbon density in croplands (kg C per m2)
         LU_InitCdensityForest(pool, cstock)     Initial litter and soil carbon density in forests (kg C per m2)
@@ -72,25 +73,25 @@ PARAMETERS
         LU_StemVol_secfor(t,pool,age)           Stem volume of secondary forests by age-class (m3 per ha)
         LU_stemvol_prifor(t,pool)               Stem volume of primary forests by age-class (m3 per ha)
 
-        LU_d_to_v_conv(pool)                    carbon density (kg C per m2) to stem volume (m3 per ha) conversion factor
-        LU_wood_Cdens(pool)                     wood carbon density (t C per m3)
-        LU_eshare_secfor(t,pool,age)            energy wood share of stem volume in secondary forest
-        LU_pshare_secfor(t,pool,age)            pulpwood share of stem volume in secondary forest
-        LU_lshare_secfor(t,pool,age)            log share of stem volume in secondary forest
-        LU_eshare_prifor(t,pool)                energy wood share of stem volume in primary forest
-        LU_pshare_prifor(t,pool)                pulpwood share of stem volume in primary forest
-        LU_lshare_prifor(t,pool)                log share of stem volume in primary forest
-        LU_rshare(pool)                         residue share of total biomass carbon
+        LU_d_to_v_conv(pool)                    Carbon density (kg C per m2) to stem volume (m3 per ha) conversion factor
+        LU_wood_Cdens(pool)                     Wood carbon density (t C per m3)
+        LU_eshare_secfor(t,pool,age)            Energy wood share of stem volume in secondary forest
+        LU_pshare_secfor(t,pool,age)            Pulpwood share of stem volume in secondary forest
+        LU_lshare_secfor(t,pool,age)            Log share of stem volume in secondary forest
+        LU_eshare_prifor(t,pool)                Energy wood share of stem volume in primary forest
+        LU_pshare_prifor(t,pool)                Pulpwood share of stem volume in primary forest
+        LU_lshare_prifor(t,pool)                Log share of stem volume in primary forest
+        LU_rshare(pool)                         Residue share of total biomass carbon
 
-        LU_Ccont                                carbon content of biomass                                               /0.5/
-        LU_WoodDens(pool)                       wood density (t per m3)
+        LU_Ccont                                Carbon content of biomass                                               /0.5/
+        LU_WoodDens(pool)                       Wood density (t per m3)
 * Wood volume parameters (calculated below)
-        LU_v_wast(t,pool,age)                   waste wood volume (m3 per ha)
-        LU_v_pulp(t,pool,age)                   pulp volume (m3 per ha)
-        LU_v_logs(t,pool,age)                   log volume (m3 per ha)
-        LU_v_logs_pr(t,pool)                    log volume (m3 per ha) in primary forest
-        LU_v_pulp_pr(t,pool)                    pulp volume (m3 per ha) in primary forest
-        LU_v_wast_pr(t,pool)                    waste wood volume (m3 per ha) in primary forest
+        LU_v_wast(t,pool,age)                   Waste wood volume (m3 per ha)
+        LU_v_pulp(t,pool,age)                   Pulp volume (m3 per ha)
+        LU_v_logs(t,pool,age)                   Log volume (m3 per ha)
+        LU_v_logs_pr(t,pool)                    Log volume (m3 per ha) in primary forest
+        LU_v_pulp_pr(t,pool)                    Pulp volume (m3 per ha) in primary forest
+        LU_v_wast_pr(t,pool)                    Waste wood volume (m3 per ha) in primary forest
 * Emission factors:
         LU_EF_CropN2O(t,pool)                   N2O emission factor for croplands (t N2O per km2)
         LU_EF_CropCH4(t,pool)                   CH4 emission factor for croplands (rice) (t CH4 per km2)
@@ -106,13 +107,14 @@ $batinclude %CLASHdir%CLASH_Livestock.gms
 
 
 
+
 *********************************************************************************************************************************
 ***                                                 Parameter value assignments                                               ***
 *********************************************************************************************************************************
 
 
 * Set the total area of each land pool based on the initial areas.
-Area(pool) = sum(use, LU_initarea(pool,use) );
+LU_TotalArea(pool) = sum(use, LU_initarea(pool,use) );
 
 
 * Cropland N2O and CH4 (rice) emissions:
@@ -173,6 +175,7 @@ LU_rshare(pool)      = 1 - (LU_d_to_v_conv(pool)*LU_wood_Cdens(pool)/10);
 LU_WoodDens(pool)=LU_wood_Cdens(pool)/LU_Ccont;
 
 
+
 *********************************************************************************************************************************
 ***                                                  Variable  declarations                                                   ***
 *********************************************************************************************************************************
@@ -217,10 +220,10 @@ VARIABLES
 EQUATIONS
 * Area:
         EQ_LU_Area(t,pool)              constrain the sum of all land-use area to the area of the land pool
-        EQ_LU_Area_SecF(t,pool)          total area of secondary forests
+        EQ_LU_Area_SecF(t,pool)         total area of secondary forests
         EQ_LU_Area_PrimF(t,pool)        primary forests' area cannot be increased
         EQ_LU_Area_PrimN(t,pool)        primary non-forests' area cannot be increased
-*        EQ_LU_Area_SecdN(t,pool)        secondary non-forests' area cannot be increased
+        EQ_LU_Area_SecdN(t,pool)        secondary non-forests' area cannot be increased
 * Carbon stocks:
         EQ_LU_CStockVege(t,pool,use)    carbon stock of vegetation by land-pool
         EQ_LU_CStockLittWoody(t,pool)   carbon stock of woody litter by land-pool
@@ -240,12 +243,12 @@ EQUATIONS
         EQ_LU_SecForRegenArea(t)
 * Harvesting:
         EQ_LU_harv_Crops(t,pool)        Harvested crops (Mt DM per year)
-        EQ_LU_harv_CropUse(t)           Crop distribution for food feed and energy use
         EQ_LU_harv_wast(t,pool)         Harvested waste wood (mln. m3 per year)
         EQ_LU_harv_pulp(t,pool)         Harvested pulpwood (mln. m3 per year)
         EQ_LU_harv_logs(t,pool)         Harvested logwood (mln. m3 per year)
-        EQ_LU_MaxWoodResidHarv(t,pool)  Maximum residue harvesting (Mt DM per year)
-        EQ_LU_MaxCropResidHarv(t,pool)  Maximum residue harvesting (Mt DM per year)
+        EQ_LU_CropUse(t)                "Distribution of crops for food, feed and energy use"
+        EQ_LU_MaxWoodResidHarv(t,pool)  Maximum residue harvesting
+        EQ_LU_MaxCropResidHarv(t,pool)  Maximum residue harvesting
 * Emissions:
         EQ_LU_emis_CropN2O(t,pool)       N2O emissions from croplands
         EQ_LU_emis_CropCH4(t,pool)       CH4 emissions from croplands (rice)
@@ -264,7 +267,7 @@ EQUATIONS
 * Land area and allocation
 
 * Land allocation is bounded by the area of the land-pool in question
-EQ_LU_Area(t,pool)..                                                       sum(use, LU_Area(t,pool,use)) =E= Area(pool) ;
+EQ_LU_Area(t,pool)..                                                       sum(use, LU_Area(t,pool,use)) =E= LU_TotalArea(pool) ;
 * Total secondary forest area is the sum over different age classes
 EQ_LU_Area_SecF(t,pool)..                                                         LU_Area(t,pool,'secdf') =E= sum(age, LU_Area_SecdF(t,pool,age) )  ;
 
@@ -272,7 +275,7 @@ EQ_LU_Area_SecF(t,pool)..                                                       
 EQ_LU_Area_PrimF(t,pool)..      LU_Area(t+1,pool,'primf') =L= LU_Area(t,pool,'primf');
 EQ_LU_Area_PrimN(t,pool)..      LU_Area(t+1,pool,'primn') =L= LU_Area(t,pool,'primn');
 * Assume the same for secondary non-forests (modelled the same as primary ecosystems, and can have thus high amount of vegetation)
-*EQ_LU_Area_SecdN(t,pool)..      LU_Area(t+1,pool,'secdn') =L= LU_Area(t,pool,'secdn');
+EQ_LU_Area_SecdN(t,pool)..      LU_Area(t+1,pool,'secdn') =L= LU_Area(t,pool,'secdn');
 
 
 
@@ -296,7 +299,6 @@ EQ_LU_MaxPriForClearing(t,pool)$tlast(t)..                                      
 * Maximum residue harvesting (note: harvesting is in Mt, C stokcs in Gt)
 EQ_LU_MaxWoodResidHarv(t,pool)..                                                               LU_harv_WoodResid(t,pool) =L=  1000 * ( LU_Cdens(t,pool,'primf')*LU_clear_pri(t,pool) + sum(age, LU_Cdens_SecnFor(t,pool,age) * LU_clear_sec(t,pool,age)) ) * LU_rshare(pool);
 EQ_LU_MaxCropResidHarv(t,pool)..                                                    LU_Ccont * LU_harv_CropResid(t,pool) =L=  1000 * LU_Area(t,pool,'crops') * (LU_LitterCropland(t,pool) - LU_Ccont * LU_Crop_Yields(t,pool) );
-
 
 
 
@@ -367,9 +369,10 @@ EQ_LU_CO2NetEmission(t)$(ord(t) LT card(t))..
 ********************************************************************
 * Production
 
-* Production from cropland and pasture in Mt/year (note: yield (dry mass) is in kg/m2 = 1000 t/km2; area in mln. km2)
-EQ_LU_harv_crops(t,pool)..                                           LU_harv_crops(t,pool) =E= 1000*LU_Crop_Yields(t,pool) * LU_Area(t,pool,'crops');
-EQ_LU_harv_CropUse(t)..             (1-LU_Crop_LossShare)*sum(pool, LU_harv_crops(t,pool)) =E=  LU_harv_FoodCrops(t) + LVST_total_feed_intake(t) + LU_harv_EnerCrops(t);
+* Cropland harvests in Mt DM/year (note: yield (dry mass) is in kg/m2 = 1000 t/km2; area is in mln. km2)
+EQ_LU_harv_crops(t,pool)..                                           LU_harv_crops(t,pool) =E= 1000*LU_Cropping_Intensity*LU_Crop_Yields(t,pool) * LU_Area(t,pool,'crops');
+* Total harvest (minus losses) distributed to different uses (food, feed, energy)
+EQ_LU_CropUse(t)..                (1-LU_Crop_LossShare) * sum(pool, LU_harv_crops(t,pool)) =E=  LU_harv_FoodCrops(t) + LVST_total_feed_intake(t) + LU_harv_EnerCrops(t);
 
 * Harvests of different wood fractions (note: LU_stemvol_secfor is in m3/ha; LU_clear_sec in mln. km2)
 EQ_LU_harv_wast(t,pool)..                                             LU_harv_wast(t,pool) =E= sum(age, LU_v_wast(t,pool,age) * 100*LU_clear_sec(t,pool,age)) + LU_v_wast_pr(t,pool) * 100*LU_clear_pri(t,pool);
@@ -388,6 +391,7 @@ EQ_LU_emis_CropCH4(t,pool)..            LU_emis_CropCH4(t,pool) =E= LU_EF_CropCH
 * Livestock pasture use:
 
 EQ_LU_LivestockPastureUse(t)..   sum(LVST_animals, LVST_headcount(t,LVST_animals) * LVST_LivestockNPPUse(LVST_animals)) / 10**6 =L= sum(pool, LU_Pasture_NPP(t,pool) * LU_Area(t,pool,'pastr'));
+
 
 
 
@@ -412,9 +416,6 @@ LU_CStockSoilHerb.Fx(tfirst,pool)  = LU_InitCdensityCropland(pool,'soil')   * LU
 
 * The first peridod's land-use CO2 net emission cannot be calculated, so fix the variable to the estimate from Global Carbon Budget 2021 (Friedlingstein et al., 2022)
 LU_CO2NetEmission.FX(tfirst(t)) = (1.1-3.1) * 44/12 * 1000;
-
-
-
 
 
 

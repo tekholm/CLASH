@@ -140,7 +140,7 @@ LU_Area.FX(t,pool,'urban')$(ord(t) >= 2) = LU_area_SSP245(t,pool,'urban');
 LU_Area.LO(t,pool,'primf')$(ord(t) >= 2) = LU_area_SSP245(t,pool,'primf');
 LU_Area.LO(t,pool,'primn')$(ord(t) >= 2) = LU_area_SSP245(t,pool,'primn');
 * Fix secondary non-forest area to disallow rapid buildup of vegetation carbon stocks
-LU_Area.FX(t,pool,'secdn')$(ord(t) >= 2) = LU_area_SSP245(t,pool,'secdn');
+*LU_Area.FX(t,pool,'secdn')$(ord(t) >= 2) = LU_area_SSP245(t,pool,'secdn');
 
 
 
